@@ -58,6 +58,21 @@ func TestCreateTask(t *testing.T) {
 	}
 }
 
+func TestIndex(t *testing.T) {
+	server := New(&fakeStore{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+
+	server.ServeHTTP(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, response.Code)
+	}
+	if !bytes.Contains(response.Body.Bytes(), []byte(`"service":"distributed-task-scheduler"`)) {
+		t.Fatalf("unexpected response: %s", response.Body.String())
+	}
+}
+
 func TestCreateTaskRejectsMissingType(t *testing.T) {
 	server := New(&fakeStore{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	request := httptest.NewRequest(http.MethodPost, "/tasks", bytes.NewBufferString(

@@ -19,10 +19,22 @@ type Server struct {
 func New(store task.Store, logger *slog.Logger) http.Handler {
 	server := &Server{store: store, logger: logger}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", server.index)
 	mux.HandleFunc("GET /healthz", server.health)
 	mux.HandleFunc("POST /tasks", server.createTask)
 	mux.HandleFunc("GET /tasks/{id}", server.getTask)
 	return mux
+}
+
+func (s *Server) index(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]any{
+		"service": "distributed-task-scheduler",
+		"endpoints": map[string]string{
+			"health":      "GET /healthz",
+			"create_task": "POST /tasks",
+			"get_task":    "GET /tasks/{id}",
+		},
+	})
 }
 
 func (s *Server) health(w http.ResponseWriter, _ *http.Request) {

@@ -18,6 +18,8 @@
 docker compose up --build
 ```
 
+打开 <http://localhost:8080> 可以查看服务信息和可用 API。
+
 创建任务：
 
 ```powershell
@@ -99,4 +101,3 @@ compose.yaml         本地运行环境
 ```powershell
 docker run --rm -v "${PWD}:/src" -w /src golang:1.24-alpine go test ./...
 ```
-
