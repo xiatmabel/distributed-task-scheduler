@@ -1,26 +1,28 @@
 # Distributed Task Scheduler
 
-一个可以在单机运行的任务调度系统 MVP，用实际案例学习任务状态机、Worker、数据库队列和并发领取。
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-## 当前功能
+A single-node task scheduler MVP for learning task state machines, workers, database-backed queues, and concurrent task claiming through a practical project.
 
-- 通过 HTTP API 创建和查询任务
-- PostgreSQL 持久化任务状态
-- Worker 轮询并执行 `print` 任务
-- 使用 `FOR UPDATE SKIP LOCKED` 原子领取任务
-- Docker Compose 一键启动
+## Features
 
-## 快速开始
+- Create and query tasks through an HTTP API
+- Persist task state in PostgreSQL
+- Poll and execute `print` tasks with a worker
+- Atomically claim tasks with `FOR UPDATE SKIP LOCKED`
+- Start the complete stack with Docker Compose
 
-需要安装 Docker Desktop。
+## Quick start
+
+Docker Desktop is required.
 
 ```powershell
 docker compose up --build
 ```
 
-打开 <http://localhost:8080> 可以查看服务信息和可用 API。
+Open <http://localhost:8080> to view service information and available endpoints.
 
-创建任务：
+Create a task:
 
 ```powershell
 $task = Invoke-RestMethod `
@@ -32,15 +34,15 @@ $task = Invoke-RestMethod `
 $task
 ```
 
-查询执行结果：
+Query its execution result:
 
 ```powershell
 Invoke-RestMethod "http://localhost:8080/tasks/$($task.id)"
 ```
 
-预期状态最终变为 `succeeded`，Worker 日志会输出消息内容。
+The task status should eventually become `succeeded`, and the worker logs will contain the message.
 
-停止并删除本地数据：
+Stop the stack and delete its local data:
 
 ```powershell
 docker compose down --volumes
@@ -59,7 +61,7 @@ docker compose down --volumes
 }
 ```
 
-可以通过可选的 `scheduled_at` 字段安排未来时间执行：
+Use the optional `scheduled_at` field to schedule a task for the future:
 
 ```json
 {
@@ -73,30 +75,30 @@ docker compose down --volumes
 
 ### `GET /tasks/{id}`
 
-返回任务、状态、执行次数、Worker 和时间信息。
+Returns the task, its status, attempt count, worker, and timestamps.
 
 ### `GET /healthz`
 
-返回 API 进程的健康状态。
+Returns the health status of the API process.
 
-## 项目结构
+## Project structure
 
 ```text
-cmd/api/             HTTP API 入口
-cmd/worker/          Worker 入口
-internal/httpapi/    HTTP 路由和处理逻辑
-internal/task/       任务模型及 PostgreSQL 存储
-migrations/          数据库初始化脚本
-compose.yaml         本地运行环境
+cmd/api/             HTTP API entry point
+cmd/worker/          Worker entry point
+internal/httpapi/    HTTP routes and handlers
+internal/task/       Task model and PostgreSQL storage
+migrations/          Database initialization scripts
+compose.yaml         Local runtime environment
 ```
 
-## 学习重点
+## Learning focus
 
-当前版本通过数据库事务避免多个 Worker 同时领取同一任务，但还没有处理 Worker 在执行中宕机的情况。下一阶段将加入租约、超时回收、重试和幂等机制。
+This version uses a database transaction to prevent multiple workers from claiming the same task concurrently. It does not yet recover tasks when a worker crashes during execution. The next stage will introduce leases, timeout recovery, retries, and idempotency.
 
-## 测试
+## Tests
 
-无需安装 Go，使用 Docker 执行：
+Run the tests through Docker without installing Go:
 
 ```powershell
 docker run --rm -v "${PWD}:/src" -w /src golang:1.24-alpine go test ./...
